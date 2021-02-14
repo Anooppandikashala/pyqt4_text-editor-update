@@ -8,26 +8,38 @@ from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 import time
 import webbrowser
+import croper
 
 from pathlib import Path
 
+from PyQt4 import QtGui, QtCore
+
 #import mammoth
 # Main Class
-import speech_recognition as sr
+#import speech_recognition as sr
+from ACropper import Ui_Dialog
+from TestCroper import Ui_Form
+
 msg= """Hello User! \n This is simple text editor app made by Ryan Antony in Association \n with CID An Education Hub
             and Team
             We Hope You are enjoying the app.\n For any help you can visit our facebook page - fb.me/cideduhub\n
             or on youtube - https://www.youtube.com/c/cidaneducationhub """ # You can edit it
 
 # Inheriting the QMAINWINDOW class form QTGUI
+class Image:
+    def __init__(self, image):
+        self.image = image
+
 
 class Window(QtGui.QMainWindow):
-    
+
+
     def __init__(self):
 
         super(Window, self).__init__()
 
         # Defining Properties of Editor
+        self.imageResourse=[]
 
         self.setWindowIcon(QtGui.QIcon("icons/text-editor.png"))
         self.setWindowTitle('TypeIt Mini Text Editor')
@@ -341,7 +353,7 @@ class Window(QtGui.QMainWindow):
     def new_file(self):
         self.textEdit = QtGui.QTextEdit()
         self.textEdit.setUndoRedoEnabled(True)
-        self.textEdit.setAcceptRichText(False)
+        self.textEdit.setAcceptRichText(True)
         self.setStyleSheet("QTextEdit{background-color: #ffffff}")
         self.textEdit.setStyleSheet("QTextEdit{font-size:20px;color:#000000}")
         self.textEdit.setWordWrapMode(QtGui.QTextOption.NoWrap)
@@ -454,8 +466,8 @@ class Window(QtGui.QMainWindow):
     def Print(self):
         dialog = QtGui.QPrintDialog()
         if dialog.exec_() == QtGui.QDialog.Accepted:
-            self.text.document().print(dialog.printer())
-
+            #self.text.document().print(dialog.printer())
+            print("Printing")
 
     def PageView(self):
         preview = QtGui.QPrintPreviewDialog()
@@ -576,30 +588,108 @@ class Window(QtGui.QMainWindow):
         #print(time.strftime("%d/%m/%Y %I:%M:%S"))
         self.textEdit.insertHtml(time.strftime("%I:%M:%p"))
 
-    def insertImage(self):   # for insertion of image in textEdit box
+    def insertImage(self):
+        filePath = QtGui.QFileDialog.getOpenFileName(
+            self,
+            "Select an image",
+            ".",
+            "Image Files(*.png *.gif *.jpg *jpeg *.bmp)"
+        )
 
-        # Get image file name
-        filename = QtGui.QFileDialog.getOpenFileName(self, 'Insert image',".","Images (*.png *.xpm *.jpg *.bmp *.gif)")
+        if filePath.isEmpty():
+            return
+        print filePath
 
-        if filename:
-            
-            # Create image object
-            image = QtGui.QImage(filename)
-            
-            # Error if unloadable
-            if image.isNull():
+        # app = QtGui.QApplication(sys.argv)
+        # test = QtGui.QMainWindow()
+        # myQExampleLabel = croper.QExampleLabel(filePath,self)
+        # myQExampleLabel.show()
 
-                popup = QtGui.QMessageBox(QtGui.QMessageBox.Critical,
-                                          "Image load error",
-                                          "Could not load image file!",
-                                          QtGui.QMessageBox.Ok,
-                                          self)
-                popup.show()
-            else:
+        # self.Form = QtGui.QWidget()
+        # self.ui = Ui_Form(filePath)
+        # self.ui.setupUi(self.Form)
+        # self.Form.show()
+        # self.setWindowModality(QtCore.Qt.ApplicationModal)
 
-                cursor = self.textEdit.textCursor()
+        self.Form = QtGui.QDialog()
+        self.ui = Ui_Dialog(filePath)
+        self.ui.setupUi(self.Form)
+        # self.Form.show()
+        # self.setWindowModality(QtCore.Qt.ApplicationModal)
 
-                cursor.insertImage(image,filename)
+        if self.Form.exec_() == QtGui.QDialog.Accepted:
+            print("Hi hello")
+        else:
+            print('Cancelled')
+            self.Form.deleteLater()
+            return
+        self.Form.deleteLater()
+
+        filePath = os.path.abspath("output.png")
+
+        imageUri = QtCore.QUrl(QtCore.QString("file://{0}".format(filePath)))
+        image = QtGui.QImage(QtGui.QImageReader(filePath).read())
+
+
+
+        # window = CurrencyWindow(self)
+        # window.show()
+        # ui = croper.CropWindow(filePath,self)
+        # ui.show()
+
+        # myQExampleLabel = croper.QExampleLabel(filePath)
+        # myQExampleLabel.show()
+
+        self.textEdit.document().addResource(
+            QtGui.QTextDocument.ImageResource,
+            imageUri,
+            QtCore.QVariant(image)
+        )
+
+
+        imageFormat = QtGui.QTextImageFormat()
+        imageFormat.setWidth(image.width())
+        imageFormat.setHeight(image.height())
+        imageFormat.setName(imageUri.toString())
+
+        textCursor = self.textEdit.textCursor()
+        textCursor.movePosition(
+            QtGui.QTextCursor.End,
+            QtGui.QTextCursor.MoveAnchor
+        )
+        self.imageResourse.append(imageFormat)
+
+        textCursor.insertImage(imageFormat)
+
+
+        # This will hide the cursor
+        blankCursor = QtGui.QCursor(QtCore.Qt.BlankCursor)
+        self.textEdit.setCursor(blankCursor)
+
+    # def insertImage1(self):   # for insertion of image in textEdit box
+    #
+    #     # Get image file name
+    #     filename = QtGui.QFileDialog.getOpenFileName(self, 'Insert image',".","Images (*.png *.xpm *.jpg *.bmp *.gif)")
+    #
+    #     if filename:
+    #
+    #         # Create image object
+    #         image = QtGui.QImage(filename)
+    #
+    #         # Error if unloadable
+    #         if image.isNull():
+    #
+    #             popup = QtGui.QMessageBox(QtGui.QMessageBox.Critical,
+    #                                       "Image load error",
+    #                                       "Could not load image file!",
+    #                                       QtGui.QMessageBox.Ok,
+    #                                       self)
+    #             popup.show()
+    #         else:
+    #
+    #             cursor = self.textEdit.textCursor()
+    #
+    #             cursor.insertImage(image,filename)
 
     #voice recognition
     def Mic(self):
