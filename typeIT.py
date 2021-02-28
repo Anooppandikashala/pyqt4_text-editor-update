@@ -19,6 +19,7 @@ from PyQt4 import QtGui, QtCore
 #import speech_recognition as sr
 from ACropper import Ui_Dialog
 from TestCroper import Ui_Form
+from photo_editor import EasyPzUI
 
 msg= """Hello User! \n This is simple text editor app made by Ryan Antony in Association \n with CID An Education Hub
             and Team
@@ -599,46 +600,17 @@ class Window(QtGui.QMainWindow):
         if filePath.isEmpty():
             return
         print filePath
+        win = EasyPzUI(filePath)
+        print(win)
+        win.exec_()
+        value = win.getOutput()
+        print(value)
+        print("It is over")
 
-        # app = QtGui.QApplication(sys.argv)
-        # test = QtGui.QMainWindow()
-        # myQExampleLabel = croper.QExampleLabel(filePath,self)
-        # myQExampleLabel.show()
-
-        # self.Form = QtGui.QWidget()
-        # self.ui = Ui_Form(filePath)
-        # self.ui.setupUi(self.Form)
-        # self.Form.show()
-        # self.setWindowModality(QtCore.Qt.ApplicationModal)
-
-        self.Form = QtGui.QDialog()
-        self.ui = Ui_Dialog(filePath)
-        self.ui.setupUi(self.Form)
-        # self.Form.show()
-        # self.setWindowModality(QtCore.Qt.ApplicationModal)
-
-        if self.Form.exec_() == QtGui.QDialog.Accepted:
-            print("Hi hello")
-        else:
-            print('Cancelled')
-            self.Form.deleteLater()
-            return
-        self.Form.deleteLater()
-
-        filePath = os.path.abspath("output.png")
+        filePath = str(value)
 
         imageUri = QtCore.QUrl(QtCore.QString("file://{0}".format(filePath)))
         image = QtGui.QImage(QtGui.QImageReader(filePath).read())
-
-
-
-        # window = CurrencyWindow(self)
-        # window.show()
-        # ui = croper.CropWindow(filePath,self)
-        # ui.show()
-
-        # myQExampleLabel = croper.QExampleLabel(filePath)
-        # myQExampleLabel.show()
 
         self.textEdit.document().addResource(
             QtGui.QTextDocument.ImageResource,
@@ -665,31 +637,6 @@ class Window(QtGui.QMainWindow):
         # This will hide the cursor
         blankCursor = QtGui.QCursor(QtCore.Qt.BlankCursor)
         self.textEdit.setCursor(blankCursor)
-
-    # def insertImage1(self):   # for insertion of image in textEdit box
-    #
-    #     # Get image file name
-    #     filename = QtGui.QFileDialog.getOpenFileName(self, 'Insert image',".","Images (*.png *.xpm *.jpg *.bmp *.gif)")
-    #
-    #     if filename:
-    #
-    #         # Create image object
-    #         image = QtGui.QImage(filename)
-    #
-    #         # Error if unloadable
-    #         if image.isNull():
-    #
-    #             popup = QtGui.QMessageBox(QtGui.QMessageBox.Critical,
-    #                                       "Image load error",
-    #                                       "Could not load image file!",
-    #                                       QtGui.QMessageBox.Ok,
-    #                                       self)
-    #             popup.show()
-    #         else:
-    #
-    #             cursor = self.textEdit.textCursor()
-    #
-    #             cursor.insertImage(image,filename)
 
     #voice recognition
     def Mic(self):
